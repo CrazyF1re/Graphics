@@ -1,5 +1,5 @@
 QT       += core gui
-
+QT       += charts
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
@@ -15,8 +15,7 @@ SOURCES += \
 HEADERS += \
     win.h
 
-FORMS += \
-    win.ui
+FORMS +=
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
