@@ -15,8 +15,14 @@
 
 
 
-#include <QtWidgets/QTextEdit>
+#include <QChartView>
 
+
+#include <QFileSystemModel>
+#include <QDir>
+#include <QFileDialog>
+#include <QStandardItemModel>
+#include "mvc.h"
 
 
 
@@ -29,15 +35,17 @@ class Win : public QWidget
     QCheckBox* black_white;
     QPushButton* print;
     QSplitter* split;
-    QListView* list;
 
-    QTextEdit* text;//pass insted of graphic (charts)
+
+    QChartView* chart;//pass insted of graphic (charts)
 
 
     QWidget* top_bar;// pannel with bittons
 
 
 
+    QListView* list;//list will show files into folder
+    MVC* model;
 
 
 
@@ -45,6 +53,7 @@ public:
     Win(QWidget *parent = nullptr);
     ~Win();
 
-
+private slots:
+    clicked_browse();
 };
 #endif // WIDGET_H

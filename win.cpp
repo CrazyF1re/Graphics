@@ -8,43 +8,68 @@ Win::Win(QWidget *parent) : QWidget(parent)
     setMinimumHeight(500);
     setMinimumWidth(800);
 
-    top_bar = new QWidget(this);
 
-    QHBoxLayout* topLayout = new QHBoxLayout(top_bar);
-    top_bar->setMaximumHeight(50);
+//creating widget for upper like menu
+    top_bar = new QWidget(this); // cereate top_bar
+    top_bar->setMaximumHeight(50); // set minimum height for top bar
 
+    //layoyt for top bar
+    QHBoxLayout* topLayout = new QHBoxLayout(top_bar);//create horizontal layout for all what we need into top bar
 
-    split = new QSplitter(this);
-    list = new QListView(split);
-    text = new QTextEdit(split);
-    list->setMinimumWidth(200);
-    list->setMaximumWidth(400);
-    text->setMinimumWidth(600);
+    //button
+    browse = new QPushButton("Browse",this);// add browse button
 
-
-    split->addWidget(list);
-    split->addWidget(text);;
-    split->setChildrenCollapsible(false);
-
-
-
-
-
-
-    browse = new QPushButton("Browse",this);//add button for next culculation
-    graphic_type = new QComboBox(top_bar);
-    black_white = new QCheckBox("Black&white" , top_bar);
-    print = new QPushButton("Save as PDF",top_bar);
+    //combobox
+    graphic_type = new QComboBox(top_bar);// add combobox for choose type of graphic
     graphic_type->addItem("First type");
     graphic_type->addItem("Second type");
+
+    //checkbox
+    black_white = new QCheckBox("Black&&white" , top_bar);// check box for colorful or black&white type of graphic
+
+
+    //button
+    print = new QPushButton("Save as PDF",top_bar);//button to save graphic into PDF
+
+
+
+    // add created elements into layout
     topLayout->addWidget(browse);
     topLayout->addWidget(graphic_type);
     topLayout->addWidget(black_white);
     topLayout->addWidget(print);
 
+
+//create splitter and two parts of splitting
+    split = new QSplitter(this);
+    list = new QListView(split);
+    chart = new QChartView(split);
+
+    //set up sizes of its
+    list->setMinimumWidth(100);
+    list->setMaximumWidth(400);
+    chart->setMinimumWidth(600);
+
+
+    //add widgets to splitter
+    split->addWidget(list);
+    split->addWidget(chart);;
+
+    //Forbid splitter Collapse widgets, so now they will not dissapear
+    split->setChildrenCollapsible(false);
+
+
+    //Create vertical layout contains top bar and splitter
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(top_bar);
     layout->addWidget(split);
+
+
+
+    //set up QFileSystemModel and listView
+    model = new MVC(this);
+    model->setRootPath(QDir::currentPath());
+    connect(browse, &QPushButton::clicked,this,&Win::clicked_browse);
 }
 
 
@@ -54,5 +79,28 @@ Win::Win(QWidget *parent) : QWidget(parent)
 Win::~Win()
 {
 
+}
+
+Win::clicked_browse()
+{
+    //put into qstring path of choosen folder
+    QString folderName = QFileDialog::getExistingDirectory(this, "Select folder");
+
+    if (!folderName.isEmpty()) {//if its not empty and such dirrectory is exists then show files into it
+        QDir dir(folderName);
+        if(dir.exists())
+        {
+            model->setRootPath(folderName);//set path into our model
+
+            list->setModel(model);//set our model into listView
+            list->setRootIndex(model->index(folderName)); // set index to root folder
+
+            list->show();//show files
+
+        }
+
+
+
+    }
 }
 
