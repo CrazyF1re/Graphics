@@ -48,9 +48,9 @@ class Win : public QWidget
     MVC* model;
 
     //should use another ways of store data,but use this because of lack of time.
-    QMap<QVariant,QVariant> data;//variable to save data we read from chosen file
+    QMap<QPair<QVariant,QVariant>,long int> data;//variable to save data we read from chosen file
 
-    Ireader* reader;
+    IReader* reader;
 
 
 public:
