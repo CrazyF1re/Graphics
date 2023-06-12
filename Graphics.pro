@@ -10,10 +10,10 @@ CONFIG += c++17
 
 SOURCES += \
     main.cpp \
-    mvc.cpp \
     win.cpp
 
 HEADERS += \
+    data_reader.h \
     mvc.h \
     win.h
 

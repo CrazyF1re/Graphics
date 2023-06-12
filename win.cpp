@@ -1,7 +1,6 @@
 #include "win.h"
 
 
-
 Win::Win(QWidget *parent) : QWidget(parent)
 {
     setWindowIconText("Charts Viewer"); // set Name and minimal sizes of window
@@ -69,7 +68,9 @@ Win::Win(QWidget *parent) : QWidget(parent)
     //set up QFileSystemModel and listView
     model = new MVC(this);
     model->setRootPath(QDir::currentPath());
-    connect(browse, &QPushButton::clicked,this,&Win::clicked_browse);
+    connect(browse, &QPushButton::clicked,this,&Win::clicked_browse);//connect button with slot
+    connect(list, SIGNAL(clicked(QModelIndex)), this, SLOT(clicked_file(QModelIndex)));
+    //connect(list, &list->clicked(QModelIndex),this,&Win::clicked_file(QModelIndex));//connect list when file choosen with slot
 }
 
 
@@ -78,6 +79,36 @@ Win::Win(QWidget *parent) : QWidget(parent)
 
 Win::~Win()
 {
+
+}
+
+Win::clicked_file(const QModelIndex& index)
+{
+
+    QString file_path = model->filePath(index);
+    //далее выбрать стратегию с помощью которой будет прочитан файл и записан в переменную
+
+    QFileInfo file(file_path);
+    if(file.suffix() == "sqlite")
+    {
+        qDebug()<<"Strategy for sqlite";
+        reader = new sql_reader(file);
+
+    }
+    else if (file.suffix()== "json")
+    {
+        qDebug()<<"Strategy for json";
+        reader = new json_reader(file);
+    }
+    else if (file.suffix() == "csv")
+    {
+        qDebug()<<"Strategy for csv";
+        reader = new csv_reader(file);
+    }
+
+    //data = reader->read_data();//записываем данные в data
+
+
 
 }
 
@@ -95,12 +126,9 @@ Win::clicked_browse()
             list->setModel(model);//set our model into listView
             list->setRootIndex(model->index(folderName)); // set index to root folder
 
-            list->show();//show files
+
 
         }
-
-
-
     }
 }
 

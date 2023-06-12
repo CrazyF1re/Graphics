@@ -12,7 +12,7 @@
 #include <QHBoxLayout>
 #include <QBoxLayout>
 #include <QListView>
-
+#include <QMap>
 
 
 #include <QChartView>
@@ -23,8 +23,8 @@
 #include <QFileDialog>
 #include <QStandardItemModel>
 #include "mvc.h"
-
-
+#include <QVariant>
+#include "data_reader.h"
 
 
 class Win : public QWidget
@@ -37,7 +37,7 @@ class Win : public QWidget
     QSplitter* split;
 
 
-    QChartView* chart;//pass insted of graphic (charts)
+    QChartView* chart;// variable to create graphic
 
 
     QWidget* top_bar;// pannel with bittons
@@ -47,13 +47,20 @@ class Win : public QWidget
     QListView* list;//list will show files into folder
     MVC* model;
 
+    //should use another ways of store data,but use this because of lack of time.
+    QMap<QVariant,QVariant> data;//variable to save data we read from chosen file
+
+    Ireader* reader;
 
 
 public:
     Win(QWidget *parent = nullptr);
     ~Win();
 
+
+
 private slots:
+    clicked_file(const QModelIndex& index);
     clicked_browse();
 };
 #endif // WIDGET_H
