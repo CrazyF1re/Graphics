@@ -27,6 +27,7 @@
 #include "data_reader.h"
 
 
+
 class Win : public QWidget
 {
     Q_OBJECT
@@ -48,7 +49,7 @@ class Win : public QWidget
     MVC* model;
 
     //should use another ways of store data,but use this because of lack of time.
-    QMap<QPair<QVariant,QVariant>,long int> data;//variable to save data we read from chosen file
+    QList<unit>  data;//variable to save data we read from chosen file
 
     IReader* reader;
 
@@ -57,10 +58,8 @@ public:
     Win(QWidget *parent = nullptr);
     ~Win();
 
-
-
 private slots:
-    clicked_file(const QModelIndex& index);
-    clicked_browse();
+    void clicked_file(const QModelIndex& index);
+    void clicked_browse();
 };
 #endif // WIDGET_H

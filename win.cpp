@@ -82,7 +82,7 @@ Win::~Win()
 
 }
 
-Win::clicked_file(const QModelIndex& index)
+void Win::clicked_file(const QModelIndex& index)
 {
 
     QString file_path = model->filePath(index);
@@ -106,13 +106,13 @@ Win::clicked_file(const QModelIndex& index)
         reader = new csv_reader(file);
     }
 
-    //data = reader->read_data();//записываем данные в data
+    data = reader->read_data();//записываем данные в data
 
 
 
 }
 
-Win::clicked_browse()
+void Win::clicked_browse()
 {
     //put into qstring path of choosen folder
     QString folderName = QFileDialog::getExistingDirectory(this, "Select folder");
