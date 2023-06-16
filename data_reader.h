@@ -63,6 +63,9 @@ public:
             temp.value = query.value(1).toString();
             temp.freq = 1;
             result.append(temp);
+
+            //something wrong, works too slow
+
 //            long int index = result.indexOf(temp);
 //            if (index != -1){
 //                result[index].freq++;
