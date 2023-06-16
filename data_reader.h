@@ -3,9 +3,15 @@
 
 
 #include <QFileInfo>
+
 #include <QSqlDatabase>
 #include <QSqlQuery>
-#include <QSqlError>
+
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+
+
 
 struct unit
 {
@@ -24,9 +30,9 @@ class IReader
 public:
     virtual ~IReader(){}
     virtual QList<unit> read_data()=0;
-    IReader(const QFileInfo& path):file(path){}
+    IReader(const QString& path):path(path){}
 protected:
-    QFileInfo file;
+    QString path;
 };
 
 class sql_reader:public IReader
@@ -37,34 +43,37 @@ class sql_reader:public IReader
 
 
 public:
-    sql_reader(const QFileInfo& path):IReader(path)
+    sql_reader(const QString& path):IReader(path)
     {
 
     }
     QList<unit> read_data()
     {
-        QList<unit> result;
-        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-        db.setDatabaseName(file.absoluteFilePath());
+        QList<unit> result;// declare variable which will return
+
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");//create variable of database
+
+        db.setDatabaseName(path);//set path of database
+
         if (!db.open()){//if database didnt opened  return empty result
             return result;
         }
-        QSqlQuery query;
+        QSqlQuery query;//declare query through which we will get data
 
         if(db.tables().size()==0)//if database has no tables return empty result
         {
             return result;
         }
-        QString table_name = db.tables()[0];;
-        query.exec("select * from "+table_name);
-        while(query.next())
+        QString table_name = db.tables()[0];//get table name
+        query.exec("select * from "+table_name);//make request to database to get data
+        unit temp;
+        while(query.next())// cycle into query
         {
-            unit temp;
-            temp.key = query.value(0);
+            temp.key = query.value(0);//set values of key and value
             temp.value = query.value(1);
-            result.append(temp);
+            result.append(temp);//append to result
         }
-        db.close();
+        db.close();//close database
         return result;
     }
 
@@ -77,21 +86,73 @@ public:
 class json_reader:public IReader
 {
 public:
-    json_reader(const QFileInfo& path):IReader(path){}
+    json_reader(const QString& path):IReader(path){}
     QList<unit> read_data()
     {
 
+        QFile file(path);//declare QFile to open it and read
+        QList<unit> result;// variable for data
+
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {//error handler
+            qDebug() << "Failed to open file for reading";
+            return result;
+        }
+        QByteArray content = file.readAll();//gets data into QByteArray
+        file.close();//close file which we read
+
+        QJsonDocument doc = QJsonDocument::fromJson(content);//declare json document and set up data into it
+
+        if (doc.isNull()) {//error handler
+            qDebug() << "Failed to parse JSON data";
+            return result;
+        }
+
+        QJsonArray jsonArray = doc.array();//gets array of json-type
+        unit tmp;//temporary variable
+        for (const QJsonValue& value : jsonArray)//cycle into json array for each element
+        {
+            if (value.isObject())//add unit if element is object only
+            {
+                QJsonObject obj = value.toObject();
+
+                tmp.key = obj["key"].toVariant();
+                tmp.value = obj["value"].toVariant();
+                result.append(tmp);
+            }
+        }
+        return result;
     }
+
 
 };
 
 class csv_reader:public IReader
 {
 public:
-    csv_reader(const QFileInfo& path):IReader(path){}
+    csv_reader(const QString& path):IReader(path){}
     QList<unit> read_data()
     {
+        QFile file(path);
+        QList<unit> result;
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {//error handler
+            qDebug() << "Failed to open file for reading";
+            return result;
+        }
+        QTextStream in(&file);
+        unit temp;
+        while(!in.atEnd())
+        {
+            QStringList pair = in.readLine().split("\":");
 
+            if(pair.size()>=2)
+            {
+                temp.key = pair[0].remove("\"");
+                temp.value = pair[1];
+
+                result.append(temp);
+            }
+        }
+        return result;
     }
 
 };

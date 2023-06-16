@@ -92,21 +92,27 @@ void Win::clicked_file(const QModelIndex& index)
     if(file.suffix() == "sqlite")
     {
         qDebug()<<"Strategy for sqlite";
-        reader = new sql_reader(file);
+        reader = new sql_reader(file.absoluteFilePath());
 
     }
     else if (file.suffix()== "json")
     {
         qDebug()<<"Strategy for json";
-        reader = new json_reader(file);
+        reader = new json_reader(file.absoluteFilePath());
     }
     else if (file.suffix() == "csv")
     {
         qDebug()<<"Strategy for csv";
-        reader = new csv_reader(file);
+        reader = new csv_reader(file.absoluteFilePath());
     }
 
     data = reader->read_data();//записываем данные в data
+
+    for( unit& pair:data)
+    {
+
+        qDebug()<<"Key: "<<pair.key.toString()<<"Value: "<<pair.value.toString();
+    }
 
 
 
