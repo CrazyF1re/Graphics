@@ -11,7 +11,7 @@ struct unit
 {
     QVariant key;
     QVariant value;
-    long int freq=0;
+
     bool operator==(const unit& p2) const
     {
         return key == p2.key && value == p2.value;
@@ -37,50 +37,41 @@ class sql_reader:public IReader
 
 
 public:
-
-    QSqlDatabase db;
     sql_reader(const QFileInfo& path):IReader(path)
     {
-        db = QSqlDatabase::addDatabase("QSQLITE");
-        db.setDatabaseName(file.absoluteFilePath());
+
     }
     QList<unit> read_data()
     {
         QList<unit> result;
-
-
-        if (!db.open()){
-            qDebug()<<"Failed";
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+        db.setDatabaseName(file.absoluteFilePath());
+        if (!db.open()){//if database didnt opened  return empty result
             return result;
         }
         QSqlQuery query;
-        QString table_name = db.tables()[0];
+
+        if(db.tables().size()==0)//if database has no tables return empty result
+        {
+            return result;
+        }
+        QString table_name = db.tables()[0];;
         query.exec("select * from "+table_name);
         while(query.next())
         {
             unit temp;
-            temp.key = query.value(0).toString();
-            temp.value = query.value(1).toString();
-            temp.freq = 1;
+            temp.key = query.value(0);
+            temp.value = query.value(1);
             result.append(temp);
-
-            //something wrong, works too slow
-
-//            long int index = result.indexOf(temp);
-//            if (index != -1){
-//                result[index].freq++;
-
-//            }
-//            else
-//            {
-//                result.append(temp);
-//            }
         }
-        query.finish();
         db.close();
-        query.clear();
         return result;
     }
+
+
+
+
+
 
 };
 class json_reader:public IReader
