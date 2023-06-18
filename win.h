@@ -21,37 +21,42 @@
 #include <QFileSystemModel>
 #include <QDir>
 #include <QFileDialog>
-#include <QStandardItemModel>
+
 #include "mvc.h"
 #include <QVariant>
 #include "data_reader.h"
 
+#include "drawer.h"
+
+#include "ioccontainer.h"
 
 
 class Win : public QWidget
 {
     Q_OBJECT
-    QPushButton* browse;
-    QComboBox* graphic_type;
-    QCheckBox* black_white;
-    QPushButton* print;
-    QSplitter* split;
+    std::unique_ptr<QPushButton> browse;
+    std::unique_ptr<QComboBox> graphic_type;
+    std::unique_ptr<QCheckBox> black_white;
+    std::unique_ptr<QPushButton> print;
+    std::unique_ptr<QSplitter> split;
 
 
-    QChartView* chart;// variable to create graphic
+    std::unique_ptr<QChartView> chart;// variable to create graphic
 
 
-    QWidget* top_bar;// pannel with bittons
+    std::unique_ptr<QWidget> top_bar;// pannel with bittons
 
+    std::unique_ptr<QHBoxLayout> topLayout;
 
-
-    QListView* list;//list will show files into folder
-    MVC* model;
+    std::unique_ptr<QListView> list;//list will show files into folder
+    std::unique_ptr<MVC> model;
 
     //should use another ways of store data,but use this because of lack of time.
     QList<unit>  data;//variable to save data we read from chosen file
 
-    IReader* reader;
+    std::unique_ptr<IReader> reader;
+
+    std::unique_ptr<IOCContainer> injector;
 
 
 public:
@@ -61,5 +66,6 @@ public:
 private slots:
     void clicked_file(const QModelIndex& index);
     void clicked_browse();
+    void comboBoxselected();
 };
 #endif // WIDGET_H

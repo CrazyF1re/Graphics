@@ -16,7 +16,10 @@ SOURCES += \
 HEADERS += \
     data_reader.h \
     mvc.h \
-    win.h
+    win.h \
+    drawer.h \
+    ioccontainer.h
+
 
 FORMS +=
 

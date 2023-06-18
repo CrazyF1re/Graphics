@@ -142,12 +142,13 @@ public:
         unit temp;
         while(!in.atEnd())
         {
-            QStringList pair = in.readLine().split("\":");
+            QStringList pair = in.readLine().split(",");
 
             if(pair.size()>=2)
             {
-                temp.key = pair[0].remove("\"");
+                temp.key = pair[0];
                 temp.value = pair[1];
+
 
                 result.append(temp);
             }
