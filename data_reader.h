@@ -51,11 +51,6 @@ signals:
 
 class sql_reader:public IReader
 {
-
-
-
-
-
 public:
     sql_reader(const QString& path):IReader(path)
     {
@@ -91,13 +86,8 @@ public:
         db.close();//close database
         return result;
     }
-
-
-
-
-
-
 };
+
 class json_reader:public IReader
 {
 public:
@@ -137,8 +127,6 @@ public:
         }
         return result;
     }
-
-
 };
 
 class csv_reader:public IReader

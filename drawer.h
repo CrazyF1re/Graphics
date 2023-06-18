@@ -10,11 +10,9 @@
 
 #include <QLineSeries>
 #include <QValueAxis>
-#include <QObject>
 //Using template pattern to use defferent types of diagrams
-class IDrawer:public QObject
+class IDrawer
 {
-    Q_OBJECT
 public:
     void draw(QList<unit> data, QChartView* chartView)// set up steps will repit
     {
@@ -34,6 +32,7 @@ public:
     virtual ~IDrawer(){}
 protected:
     virtual void SetupData(QChartView* chartView,QList<unit> data)=0;//set up data into char viewer
+    virtual bool checkData(QList<unit> data)=0;
 
 
 
