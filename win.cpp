@@ -105,7 +105,7 @@ void Win::clicked_file(const QModelIndex& index)
     {
         reader = std::make_unique<csv_reader>(file.absoluteFilePath());
     }
-
+    data.clear();
     data = reader.get()->read_data();//add data into data
 
     int emptyIndex = graphic_type->findText(graphic_type->placeholderText());//find index of "Select type"

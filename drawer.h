@@ -10,9 +10,11 @@
 
 #include <QLineSeries>
 #include <QValueAxis>
+#include <QObject>
 //Using template pattern to use defferent types of diagrams
-class IDrawer
+class IDrawer:public QObject
 {
+    Q_OBJECT
 public:
     void draw(QList<unit> data, QChartView* chartView)// set up steps will repit
     {
@@ -32,7 +34,8 @@ public:
     virtual ~IDrawer(){}
 protected:
     virtual void SetupData(QChartView* chartView,QList<unit> data)=0;//set up data into char viewer
-    // ???  virtual void SetupDiagram(QChartView* chart);//set up type of diagram
+
+
 
 };
 
@@ -40,39 +43,77 @@ protected:
 class CircleDrawer:public IDrawer
 {
 protected:
+    bool checkData(QList<unit> data)
+    {
+        int i=0;
+        data[i].value.toDouble();
+        while(data[i].value.isValid() && i <data.size()-1)
+        {
+            i++;
+            data[i].value.toDouble();
+        }
+        return data.size()-1==i;
+    }
     void SetupData(QChartView *chartView, QList<unit> data)
     {
-        QPieSeries* series = new QPieSeries();
-        for(unit& piece : data)
+        if(checkData(data))
         {
-            if(data.indexOf(piece)==30)break;
-            QString key  = piece.key.toString();
-            double value = piece.value.toDouble();
-            series->append(key,value);
-        }
+            QPieSeries* series = new QPieSeries();
+            for(unit& piece : data)
+            {
+                if(data.indexOf(piece)==30)break;
+                QString key  = piece.key.toString();
+                double value = piece.value.toDouble();
+                series->append(key,value);
+            }
 
-        chartView->chart()->addSeries(series);
+            chartView->chart()->addSeries(series);
+            chartView->chart()->setTitle("Circle Diagram");
+        }
+        else
+        {
+            chartView->chart()->setTitle("Wrong data into file");
+        }
     }
 };
 
 class BarDrawer: public IDrawer
 {
 protected:
+    bool checkData(QList<unit> data)
+    {
+        int i=0;
+        data[i].value.toDouble();
+        while(data[i].value.isValid() && i <data.size()-1)
+        {
+            i++;
+            data[i].value.toDouble();
+        }
+        return data.size()-1==i;
+    }
     void SetupData(QChartView* chartView,QList<unit> data)
     {
-        QBarSeries* series = new QBarSeries();
-
-        for(unit& piece : data)
+        if(checkData(data))
         {
-            if(data.indexOf(piece)==30)break;
-            QString key  = piece.key.toString();
-            double value = piece.value.toDouble();
+            QBarSeries* series = new QBarSeries();
 
-            QBarSet* set = new QBarSet(key);
-            *set<<value;
-            series->append(set);
+            for(unit& piece : data)
+            {
+                if(data.indexOf(piece)==30)break;
+                QString key  = piece.key.toString();
+                double value = piece.value.toDouble();
+
+                QBarSet* set = new QBarSet(key);
+                *set<<value;
+                series->append(set);
+            }
+            chartView->chart()->addSeries(series);
+            chartView->chart()->setTitle("Bar Diagram");
         }
-        chartView->chart()->addSeries(series);
+        else
+        {
+            chartView->chart()->setTitle("Wrong data into file");
+        }
 
     }
 };
@@ -82,9 +123,14 @@ class LineDrawer: public IDrawer
     bool checkData(QList<unit> data)
     {
         int i=0;
-        while(data[i].key.canConvert( QVariant::Double) && data[i].value.canConvert(QVariant::Double )&& i <data.size()-1)
+        data[i].key.toDouble();
+        data[i].value.toDouble();
+        while(data[i].key.isValid() && data[i].value.isValid() && i <data.size()-1)
         {
             i++;
+            data[i].key.toDouble();
+            data[i].value.toDouble();
+
         }
         return data.size()-1==i;
     }
@@ -104,6 +150,11 @@ protected:
 
             }
             chartView->chart()->addSeries(series);
+            chartView->chart()->setTitle("Line Diagram");
+        }
+        else
+        {
+            chartView->chart()->setTitle("Wrong data into file");
         }
     }
 };

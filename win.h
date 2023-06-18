@@ -33,7 +33,7 @@
 #include <QGraphicsColorizeEffect>
 
 #include <QPrinter>
-
+#include <QSystemTrayIcon>
 
 
 class Win : public QWidget
