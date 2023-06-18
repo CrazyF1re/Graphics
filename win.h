@@ -66,9 +66,9 @@ class Win : public QWidget
 
 public:
     Win(QWidget *parent = nullptr);
-    ~Win();
-
+    ~Win(){}
 private slots:
+
     void clicked_file(const QModelIndex& index);
     void clicked_browse();
     void clicked_checkbox(int state);

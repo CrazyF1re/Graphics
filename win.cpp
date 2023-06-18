@@ -82,11 +82,6 @@ Win::Win(QWidget *parent) : QWidget(parent)
 
 }
 
-Win::~Win()
-{
-
-}
-
 void Win::clicked_file(const QModelIndex& index)
 {
     QString file_path = model->filePath(index);
