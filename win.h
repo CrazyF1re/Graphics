@@ -30,6 +30,11 @@
 
 #include "ioccontainer.h"
 
+#include <QGraphicsColorizeEffect>
+
+#include <QPrinter>
+
+
 
 class Win : public QWidget
 {
@@ -56,7 +61,7 @@ class Win : public QWidget
 
     std::unique_ptr<IReader> reader;
 
-    std::unique_ptr<IOCContainer> injector;
+    IOCContainer injector;
 
 
 public:
@@ -66,6 +71,9 @@ public:
 private slots:
     void clicked_file(const QModelIndex& index);
     void clicked_browse();
+    void clicked_checkbox(int state);
     void comboBoxselected();
+    void save_pdf();
+
 };
 #endif // WIDGET_H

@@ -1,6 +1,8 @@
 QT       += core gui
 QT       += charts
 QT       += sql
+QT       += widgets
+QT += printsupport
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17

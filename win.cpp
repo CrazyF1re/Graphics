@@ -25,7 +25,6 @@ Win::Win(QWidget *parent) : QWidget(parent)
     graphic_type->addItem("Круговая диаграмма");
     graphic_type->addItem("Столбчатая диаграмма");
     graphic_type->addItem("Линейная диаграмма");
-    graphic_type->addItem("Рассеяние");
 
     //checkbox
     black_white = std::make_unique<QCheckBox>("Black&&white" , top_bar.get());// check box for colorful or black&white type of graphic
@@ -33,7 +32,7 @@ Win::Win(QWidget *parent) : QWidget(parent)
 
     //button
     print = std::make_unique<QPushButton>("Save as PDF",top_bar.get());//button to save graphic into PDF
-
+    print.get()->setEnabled(false);
 
 
     // add created elements into layout
@@ -52,6 +51,7 @@ Win::Win(QWidget *parent) : QWidget(parent)
     list->setMinimumWidth(100);
     list->setMaximumWidth(400);
     chart->setMinimumWidth(600);
+    chart->chart()->setBackgroundBrush(QBrush(Qt::white));
 
 
     //add widgets to splitter
@@ -77,6 +77,9 @@ Win::Win(QWidget *parent) : QWidget(parent)
     connect(browse.get(), &QPushButton::clicked,this,&Win::clicked_browse);//connect button with slot
     connect(list.get(), SIGNAL(clicked(QModelIndex)), this, SLOT(clicked_file(QModelIndex)));
     connect(graphic_type.get(),&QComboBox::activated,this,&Win::comboBoxselected);
+    connect(black_white.get(),&QCheckBox::stateChanged,this,&Win::clicked_checkbox);
+    connect(print.get(),&QPushButton::clicked,this,&Win::save_pdf);
+
 }
 
 Win::~Win()
@@ -92,18 +95,14 @@ void Win::clicked_file(const QModelIndex& index)
     QFileInfo file(file_path);
     if(file.suffix() == "sqlite")
     {
-        qDebug()<<"Strategy for sqlite";
         reader = std::make_unique<sql_reader>(file.absoluteFilePath());
-
     }
     else if (file.suffix()== "json")
     {
-        qDebug()<<"Strategy for json";
         reader = std::make_unique<json_reader>(file.absoluteFilePath());
     }
     else if (file.suffix() == "csv")
     {
-        qDebug()<<"Strategy for csv";
         reader = std::make_unique<csv_reader>(file.absoluteFilePath());
     }
 
@@ -129,8 +128,25 @@ void Win::clicked_browse()
 
             list->setModel(model.get());//set our model into listView
             list->setRootIndex(model->index(folderName)); // set index to root folder
+            print.get()->setEnabled(false);
         }
     }
+
+}
+
+void Win::clicked_checkbox(int state)
+{
+    if(state==2)
+    {
+        QGraphicsColorizeEffect* tmp = new QGraphicsColorizeEffect();
+        tmp->setColor(Qt::black);
+        chart->chart()->setGraphicsEffect(tmp);
+    }
+    else
+    {
+        chart->chart()->setGraphicsEffect(0);
+    }
+
 }
 
 void Win::comboBoxselected()
@@ -139,21 +155,42 @@ void Win::comboBoxselected()
     {
         if(graphic_type->currentText()=="Круговая диаграмма")
         {
-            CircleDrawer temp;
-            temp.draw(data,chart.get());
+            injector.RegisterInstance<IDrawer,CircleDrawer>();
+            injector.GetObject<IDrawer>()->draw(data,chart.get());
+
+
         }
         else if (graphic_type->currentText()=="Столбчатая диаграмма")
         {
-            qDebug()<<"Столбчатая диаграмма";
+            injector.RegisterInstance<IDrawer,BarDrawer>();
+            injector.GetObject<IDrawer>()->draw(data,chart.get());
+
+
         }
         else if (graphic_type->currentText()=="Линейная диаграмма")
         {
-            qDebug()<<"Линейная диаграмма";
+            injector.RegisterInstance<IDrawer,LineDrawer>();
+            injector.GetObject<IDrawer>()->draw(data,chart.get());
+
         }
-        else if (graphic_type->currentText()=="Рассеяние")
-        {
-            qDebug()<<"Рассеяние";
-        }
+        print.get()->setEnabled(true);
     }
+}
+
+void Win::save_pdf()
+{
+    // Создаем объект QPrinter для печати и сохранения изображения в PDF формате
+    QPrinter printer;
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    QString fileName = model.get()->fileName(list.get()->currentIndex()).split(".")[0];
+    printer.setOutputFileName(fileName+" "+graphic_type.get()->currentText()+".pdf");
+
+
+    printer.setFullPage(true);
+
+    // Рисуем график на принтере
+    QPainter painter(&printer);
+    chart->render(&painter);
+    painter.end();
 }
 

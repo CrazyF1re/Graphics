@@ -5,6 +5,11 @@
 #include <QPieSeries>
 #include <QChartView>
 
+#include <QBarSeries>
+#include <QBarSet>
+
+#include <QLineSeries>
+#include <QValueAxis>
 //Using template pattern to use defferent types of diagrams
 class IDrawer
 {
@@ -50,6 +55,57 @@ protected:
     }
 };
 
+class BarDrawer: public IDrawer
+{
+protected:
+    void SetupData(QChartView* chartView,QList<unit> data)
+    {
+        QBarSeries* series = new QBarSeries();
 
+        for(unit& piece : data)
+        {
+            if(data.indexOf(piece)==30)break;
+            QString key  = piece.key.toString();
+            double value = piece.value.toDouble();
+
+            QBarSet* set = new QBarSet(key);
+            *set<<value;
+            series->append(set);
+        }
+        chartView->chart()->addSeries(series);
+
+    }
+};
+
+class LineDrawer: public IDrawer
+{
+    bool checkData(QList<unit> data)
+    {
+        int i=0;
+        while(data[i].key.canConvert( QVariant::Double) && data[i].value.canConvert(QVariant::Double )&& i <data.size()-1)
+        {
+            i++;
+        }
+        return data.size()-1==i;
+    }
+
+protected:
+    void SetupData(QChartView* chartView,QList<unit> data)
+    {
+
+        if(checkData(data))
+        {
+            QLineSeries* series = new QLineSeries();
+
+            for(unit& piece:data)
+            {
+
+                series->append(piece.key.toDouble(),piece.value.toDouble());
+
+            }
+            chartView->chart()->addSeries(series);
+        }
+    }
+};
 
 #endif // DRAWER_H
