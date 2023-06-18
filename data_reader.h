@@ -10,7 +10,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
-
+#include <QMessageBox>
 
 
 struct unit
@@ -25,14 +25,28 @@ struct unit
 };
 
 
-class IReader
+class IReader:public QObject
 {
+    Q_OBJECT
 public:
     virtual ~IReader(){}
     virtual QList<unit> read_data()=0;
-    IReader(const QString& path):path(path){}
+    IReader(const QString& path):path(path)
+    {
+        connect(this,&IReader::error_message,this,&IReader::output_message);
+    }
 protected:
     QString path;
+public slots:
+    void output_message(QString message)
+    {
+        QMessageBox msgBox;
+        msgBox.setText(message);
+        msgBox.setStandardButtons(QMessageBox::Ok );
+        msgBox.exec();
+    }
+signals:
+   void error_message(QString message);
 };
 
 class sql_reader:public IReader
@@ -45,7 +59,6 @@ class sql_reader:public IReader
 public:
     sql_reader(const QString& path):IReader(path)
     {
-
     }
     QList<unit> read_data()
     {
@@ -56,12 +69,14 @@ public:
         db.setDatabaseName(path);//set path of database
 
         if (!db.open()){//if database didnt opened  return empty result
+            emit error_message("Database does not open");
             return result;
         }
         QSqlQuery query;//declare query through which we will get data
 
         if(db.tables().size()==0)//if database has no tables return empty result
         {
+            emit error_message("Database has no tables");
             return result;
         }
         QString table_name = db.tables()[0];//get table name
@@ -94,7 +109,7 @@ public:
         QList<unit> result;// variable for data
 
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {//error handler
-            qDebug() << "Failed to open file for reading";
+            emit error_message("Failed to open file for reading");
             return result;
         }
         QByteArray content = file.readAll();//gets data into QByteArray
@@ -103,7 +118,7 @@ public:
         QJsonDocument doc = QJsonDocument::fromJson(content);//declare json document and set up data into it
 
         if (doc.isNull()) {//error handler
-            qDebug() << "Failed to parse JSON data";
+            emit error_message("Failed to parse JSON data");
             return result;
         }
 
@@ -135,7 +150,12 @@ public:
         QFile file(path);
         QList<unit> result;
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {//error handler
-            qDebug() << "Failed to open file for reading";
+            emit error_message("Failed to open file for reading");
+            return result;
+        }
+        if(file.size()==0)
+        {
+            emit error_message("File is empty");
             return result;
         }
         QTextStream in(&file);
